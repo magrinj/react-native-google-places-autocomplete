@@ -66,6 +66,7 @@ const GooglePlacesAutocomplete = React.createClass({
     placeholder: React.PropTypes.string,
     onPress: React.PropTypes.func,
     onResults: React.PropTypes.func,
+    onFilter: React.PropTypes.func,
     minLength: React.PropTypes.number,
     fetchDetails: React.PropTypes.bool,
     autoFocus: React.PropTypes.bool,
@@ -92,6 +93,8 @@ const GooglePlacesAutocomplete = React.createClass({
       placeholder: 'Search',
       onPress: () => {},
       onResults: (results) => { return results },
+      onFilterAutocomplete: () => { return true },
+      onFilterNearby: () => { return true },
       minLength: 0,
       fetchDetails: false,
       autoFocus: false,
@@ -323,23 +326,33 @@ const GooglePlacesAutocomplete = React.createClass({
     return rowData;
   },
 
-  _filterResultsByTypes(responseJSON, types) {
-    if (types.length === 0) return responseJSON.results;
+  _filterResultsByTypes(results, types) {
+    if (types.length === 0) return results;
 
-    var results = [];
-    for (let i = 0; i < responseJSON.results.length; i++) {
+    var filteredResults = [];
+    for (let i = 0; i < results.length; i++) {
       let found = false;
       for (let j = 0; j < types.length; j++) {
-        if (responseJSON.results[i].types.indexOf(types[j]) !== -1) {
+        if (results[i].types.indexOf(types[j]) !== -1) {
           found = true;
           break;
         }
       }
       if (found === true) {
-        results.push(responseJSON.results[i]);
+        filteredResults.push(results[i]);
       }
     }
-    return results;
+    return filteredResults;
+  },
+
+  _filterResults(results, compFunc) {
+    var filteredResults = [];
+    for (let i = 0; i < results.length; i++) {
+      if (compFunc(results[i])) {
+        filteredResults.push(results[i]);
+      }
+    }
+    return filteredResults;
   },
 
 
@@ -363,9 +376,9 @@ const GooglePlacesAutocomplete = React.createClass({
             if (this.isMounted()) {
               var results = [];
               if (this.props.nearbyPlacesAPI === 'GoogleReverseGeocoding') {
-                results = this._filterResultsByTypes(responseJSON, this.props.filterReverseGeocodingByTypes);
+                results = this._filterResultsByTypes(responseJSON.results, this.props.filterReverseGeocodingByTypes);
               } else {
-                results = this.props.onResults(responseJSON.results);
+                results = this._filterResults(this.props.onResults(responseJSON.results), this.props.onFilterNearby);
               }
 
               this.setState({
@@ -425,7 +438,7 @@ const GooglePlacesAutocomplete = React.createClass({
           const responseJSON = JSON.parse(request.responseText);
           if (typeof responseJSON.predictions !== 'undefined') {
             if (this.isMounted()) {
-              this._results = this.props.onResults(responseJSON.predictions);
+              this._results = this._filterResults(this.props.onResults(responseJSON.predictions), this.props.onFilterAutocomplete);
               this.setState({
                 dataSource: this.state.dataSource.cloneWithRows(this.buildRowsFromResults(responseJSON.predictions)),
               });
