@@ -65,6 +65,7 @@ const GooglePlacesAutocomplete = React.createClass({
   propTypes: {
     placeholder: React.PropTypes.string,
     onPress: React.PropTypes.func,
+    onResults: React.PropTypes.func,
     minLength: React.PropTypes.number,
     fetchDetails: React.PropTypes.bool,
     autoFocus: React.PropTypes.bool,
@@ -90,6 +91,7 @@ const GooglePlacesAutocomplete = React.createClass({
     return {
       placeholder: 'Search',
       onPress: () => {},
+      onResults: (results) => { return results },
       minLength: 0,
       fetchDetails: false,
       autoFocus: false,
@@ -363,7 +365,7 @@ const GooglePlacesAutocomplete = React.createClass({
               if (this.props.nearbyPlacesAPI === 'GoogleReverseGeocoding') {
                 results = this._filterResultsByTypes(responseJSON, this.props.filterReverseGeocodingByTypes);
               } else {
-                results = responseJSON.results;
+                results = this.props.onResults(responseJSON.results);
               }
 
               this.setState({
@@ -423,7 +425,7 @@ const GooglePlacesAutocomplete = React.createClass({
           const responseJSON = JSON.parse(request.responseText);
           if (typeof responseJSON.predictions !== 'undefined') {
             if (this.isMounted()) {
-              this._results = responseJSON.predictions;
+              this._results = this.props.onResults(responseJSON.predictions);
               this.setState({
                 dataSource: this.state.dataSource.cloneWithRows(this.buildRowsFromResults(responseJSON.predictions)),
               });
