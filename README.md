@@ -2,6 +2,10 @@
 Customizable Google Places autocomplete component for iOS and Android React-Native apps
 
 ### Changelog
+- 1.2.7 : Use `children` prop to pass children elements directly into `GooglePlacesAutocomplete`.
+- 1.2.6 : Added `renderRow` prop.
+- 1.2.5 : Added `renderDescription` prop for rendering dropdown item text
+- 1.2.4 : Added `listViewDisplayed` prop for controlling dropdown
 - 1.2.3 : Removed ProgressBarAndroid to remove warnings
 - 1.2.2 : Added prop to change placeholder text color
 - 1.2.1 : Fixed special request characters issue + ensure react-native@0.28 peer dependency.
@@ -28,7 +32,9 @@ var Example = React.createClass({
         placeholder='Search'
         minLength={2} // minimum length of text to search
         autoFocus={false}
+        listViewDisplayed='auto'    // true/false/undefined
         fetchDetails={true}
+        renderDescription={(row) => row.terms[0].value} // display street only
         onPress={(data, details = null) => { // 'details' is provided when fetchDetails = true
           console.log(data);
           console.log(details);
@@ -79,6 +85,55 @@ var Example = React.createClass({
 1. ```npm install react-native-google-places-autocomplete --save```
 2. Get your [Google Places API keys](https://developers.google.com/places/) and enable "Google Places API Web Service" (NOT Android or iOS) in the console.
 3. Enable "Google Maps Geocoding API" if you want to use GoogleReverseGeocoding for Current Location
+
+
+
+### Styling
+
+```GooglePlacesAutocomplete``` can be easily customized to meet styles of your  app. Pass styles props to ```GooglePlacesAutocomplete``` with style object for different elements (keys for style object are listed below)
+
+| key | type |
+| ---- | ---- |
+| container | object (View) |
+| description | object (Text style) |
+| textInputContainer | object (View style) |
+| textInput | object (style) |
+| loader | object (View style) |
+| listView | object (ListView style) |
+| predefinedPlacesDescription | object (Text style) |
+| poweredContainer | object (View style) |
+| powered | object (Image style) |
+
+
+#### Example
+
+
+```
+<GooglePlacesAutocomplete
+  placeholder='Enter Location'
+  minLength={2}
+  autoFocus={false}
+  fetchDetails={true}
+  styles={{
+    textInputContainer: {
+      backgroundColor: 'rgba(0,0,0,0)',
+      borderTopWidth: 0,
+      borderBottomWidth:0
+    },
+    textInput: {
+      marginLeft: 0,
+      marginRight: 0,
+      height: 38,
+      color: '#5d5d5d',
+      fontSize: 16
+    },
+    predefinedPlacesDescription: {
+      color: '#1faadb'
+    },
+  }}
+  currentLocation={false}
+/>
+```
 
 
 ### Features
